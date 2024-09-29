@@ -1,0 +1,9 @@
+[build]
+target = "riscv64gc-unknown-none-elf"
+# 指定目标架构为 riscv64gc，无操作系统，无环境，无硬件支持
+
+[target.riscv64gc-unknown-none-elf]
+rustflags = [
+    "-Clink-arg=-Tsrc/linker.ld", "-Cforce-frame-pointers=yes"
+    # 使用自定义的链接脚本
+]

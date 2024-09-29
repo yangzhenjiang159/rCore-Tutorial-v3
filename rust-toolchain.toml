@@ -1,0 +1,14 @@
+[toolchain]
+profile = "minimal"
+# use the nightly version of the last stable toolchain, see <https://forge.rust-lang.org/>
+channel = "nightly-2024-05-01"
+components = ["rust-src", "llvm-tools", "rustfmt", "clippy"]
+targets = ["riscv64gc-unknown-none-elf"]
+
+# [toolchain]: 这是一个顶级标题，表示下面的配置项是关于Rust工具链的。
+# profile = "minimal": 这一行指定了Rust工具链的配置文件为"minimal"，这意味着只安装最基本的组件。
+# # use the nightly version of the last stable toolchain, see https://forge.rust-lang.org/: 关于如何获取最新稳定的Rust工具链的信息。
+# channel = "nightly-2024-05-01": 这一行指定了Rust工具链的更新频道为"nightly-2024-05-01"，这意味着将使用2024年5月1日的Rust nightly版本。
+# components = ["rust-src", "llvm-tools", "rustfmt", "clippy"]: 这一行列出了需要安装的额外组件，包括Rust源代码、LLVM工具、Rust格式化工具和Rust代码检查工具。
+# targets = ["riscv64gc-unknown-none-elf"]: 这一行指定了需要支持的目标平台为"riscv64gc-unknown-none-elf"，这是一个RISC-V 64位架构的目标平台。
+# 总的来说，这段代码定义了一个Rust工具链的配置，包括使用的Rust版本、额外组件和目标平台。这样的配置文件通常用于确保项目在不同的环境中使用一致的Rust工具链设置。
