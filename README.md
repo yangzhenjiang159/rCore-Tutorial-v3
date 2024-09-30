@@ -5,6 +5,26 @@ rCore-Tutorial API 文档.  查看 [十个操作系统的API文档](#OS-API-DOCS
 
 官方QQ群: 735045051
 
+https://learningos.cn/rCore-Tutorial-Guide-2024S/
+https://rcore-os.cn/rCore-Tutorial-Book-v3/
+
+顺便发放一下资料：
+Linux教程
+https://101.lug.ustc.edu.cn
+Git教程
+https://liaoxuefeng.com/books/git/introduction/index.html
+以下为此前通知：
+欢迎大家来到24秋冬季操作系统训练营！
+我们的课程9 月 29 日正式开始，之前大家可以先看春季的导学课程（ https://opencamp.cn/os2edu/camp/2024spring/stage/0?tab=video )，也可以预览下面的实验。
+第一阶段实验：
+**开课后**会详细讲解下面的 Rust 语言和 Rustlings 教程内容。欢迎提前预习、互相交流，就算作业看不懂做不完也没有关系~
+先点击链接创建仓库，完成第一阶段（Rust 语言）的学习：https://classroom.github.com/a/nxqlgJOx
+每次提交后，可以在 GitHub 仓库的 Action 页面看到自己的成绩（满分110），也可以在训练营排行榜上实时看到自己的排名： https://opencamp.cn/os2edu/camp/2024fall/stage/1?tab=rank
+排行榜所在的网站即是课程主页，后续的直播课程都会在网站开展，欢迎大家提前登录，预览往届的课程和视频录播
+
+
+https://zjp-cn.github.io/posts/rcore-gdb/   gdb调试wiki
+
 ## news
 - 23/06/2022：版本 3.6.0 正在制作中！现在我们直接在 chX 分支上更新代码，请定期检查是否有更新。
 
@@ -26,6 +46,7 @@ rCore-Tutorial API 文档.  查看 [十个操作系统的API文档](#OS-API-DOCS
 * 尽管代码中缺乏注释，但有[详细的中文文档](https://rcore-os.github.io/rCore-Tutorial-Book-v3/)（目前暂无英文版本）
 
 ## 环境安装
+如果是通过qemu运行，需要下载Ubuntu进行运行,如果是windows
 
 ### 安装 Rust
 
