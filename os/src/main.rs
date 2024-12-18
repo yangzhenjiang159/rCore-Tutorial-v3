@@ -56,31 +56,27 @@ pub fn rust_main() -> ! {
         fn boot_stack_lower_bound(); // stack lower bound
         fn boot_stack_top(); // stack top
     }
-    println!("[kernel] start!");
-    println!("[kernel] clear_bss");
     clear_bss();
     logging::init();
-    println!("[kernel] logging::init");
-    // trace!(
-    //     "[kernel] .text [{:#x}, {:#x})",
-    //     stext as usize,
-    //     etext as usize
-    // );
-    // debug!(
-    //     "[kernel] .rodata [{:#x}, {:#x})",
-    //     srodata as usize, erodata as usize
-    // );
-    // info!(
-    //     "[kernel] .data [{:#x}, {:#x})",
-    //     sdata as usize, edata as usize
-    // );
-    // warn!(
-    //     "[kernel] boot_stack top=bottom={:#x}, lower_bound={:#x}",
-    //     boot_stack_top as usize, boot_stack_lower_bound as usize
-    // );
-    // error!("[kernel] .bss [{:#x}, {:#x})", sbss as usize, ebss as usize);
+    trace!(
+        "[kernel] .text [{:#x}, {:#x})",
+        stext as usize,
+        etext as usize
+    );
+    debug!(
+        "[kernel] .rodata [{:#x}, {:#x})",
+        srodata as usize, erodata as usize
+    );
+    info!(
+        "[kernel] .data [{:#x}, {:#x})",
+        sdata as usize, edata as usize
+    );
+    warn!(
+        "[kernel] boot_stack top=bottom={:#x}, lower_bound={:#x}",
+        boot_stack_top as usize, boot_stack_lower_bound as usize
+    );
+    error!("[kernel] .bss [{:#x}, {:#x})", sbss as usize, ebss as usize);
     trap::init();
     batch::init();
-    println!("[kernel] batch::init");
     batch::run_next_app();
 }
