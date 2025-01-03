@@ -142,6 +142,8 @@ pub fn run_next_app() -> ! {
     drop(app_manager);
     // before this we have to drop local variables related to resources manually
     // and release the resources
+    //在此之前我们必须手动删除与资源相关的局部变量
+    //并释放资源
     extern "C" {
         fn __restore(cx_addr: usize);
     }
