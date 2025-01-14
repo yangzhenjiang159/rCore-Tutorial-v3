@@ -109,7 +109,48 @@ impl TaskManager {
     }
 
     /// 找到"Ready"任务并切换当前"Running"的任务, 如果所有任务中没有"Ready"的任务时,退出
-    fn run_next_task(&self) -> !{
+    fn run_next_task(&self) {
+        if let Some(next) = self.find_next_task() {
+            let mut inner = self.inner.exclusive_access();
+            let current = inner.current_task;
+            inner.tasks[next].task_status = TaskStatus::Running;
+            inner.current_task = next;
+            let current_task_cx_ptr = &mut inner.tasks[current].task_cx as *mut TaskContext;
+            let next_task_cx_ptr = &inner.tasks[next].task_cx as *const TaskContext;
+            drop(inner);
 
+            unsafe {
+                __switch(current_task_cx_ptr, next_task_cx_ptr);
+            }
+        } else {
+            println!("All applications completed!");
+            shutdown(false);
+        }
     }
+}
+
+pub fn run_first_task() {
+    TASK_MANAGER.run_first_task();
+}
+
+/// suspend current task
+fn mark_current_suspended() {
+    TASK_MANAGER.mark_current_suspended();
+}
+
+/// exit current task
+fn mark_current_exited() {
+    TASK_MANAGER.mark_current_exited();
+}
+
+/// suspend current task, then run next task
+pub fn suspend_current_and_run_next() {
+    mark_current_suspended();
+    run_next_task();
+}
+
+/// exit current task,  then run next task
+pub fn exit_current_and_run_next() {
+    mark_current_exited();
+    run_next_task();
 }
