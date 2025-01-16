@@ -36,14 +36,16 @@ pub struct TaskManager {
     num_app: usize,
     inner: UPSafeCell<TaskManagerInner>,
 }
-
+/// Inner of Task Manager
 pub struct TaskManagerInner {
+    /// task list
     tasks: [TaskControlBlock; MAX_APP_NUM],
+    /// id of current `Running` task
     current_task: usize,
 }
 
-/// 全局静态属性(懒加载)
 lazy_static! {
+    /// Global variable: TASK_MANAGER
     pub static ref TASK_MANAGER: TaskManager = {
         let num_app = get_num_app();
         let mut tasks = [TaskControlBlock {
@@ -105,7 +107,7 @@ impl TaskManager {
         let current = inner.current_task;
         (current + 1 .. current + self.num_app + 1)
             .map(|index| index % self.num_app)
-            .find(|i| inner.tasks[i].task_status == TaskStatus::Ready)
+            .find(|i| inner.tasks[*i].task_status == TaskStatus::Ready)
     }
 
     /// 找到"Ready"任务并切换当前"Running"的任务, 如果所有任务中没有"Ready"的任务时,退出
@@ -129,8 +131,15 @@ impl TaskManager {
     }
 }
 
+/// run first task
 pub fn run_first_task() {
     TASK_MANAGER.run_first_task();
+}
+
+
+/// rust next task
+fn run_next_task() {
+    TASK_MANAGER.run_next_task();
 }
 
 /// suspend current task

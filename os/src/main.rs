@@ -1,12 +1,20 @@
-//! 主模块和入口点
-//! 内核的各种设施被实现为子模块。最重要的是:
+//! The main module and entrypoint
 //!
-//! - [`trap`]:内核的各种设施被实现为子模块。
-//! - [`syscall`]:系统调用处理与实现
+//! Various facilities of the kernels are implemented as submodules. The most
+//! important ones are:
 //!
-//! 操作系统也在这个模块中启动。内核代码启动从'entry. asm'执行，
-//! 之后调用['rust_main（）']初始化各种功能。（见其源代码详细信息。）
-//! 然后我们调用 ['::run_next_app（）'] 并第一次转到用户空间。
+//! - [`trap`]: Handles all cases of switching from userspace to the kernel
+//! - [`task`]: Task management
+//! - [`syscall`]: System call handling and implementation
+//!
+//! The operating system also starts in this module. Kernel code starts
+//! executing from `entry.asm`, after which [`rust_main()`] is called to
+//! initialize various pieces of functionality. (See its source code for
+//! details.)
+//!
+//! We then call [`task::run_first_task()`] and for the first time go to
+//! userspace.
+
 #![deny(missing_docs)]
 #![deny(warnings)]
 #![no_std]
@@ -15,18 +23,20 @@
 
 use core::arch::global_asm;
 
-use log::*;
+#[path = "boards/qemu.rs"]
+mod board;
+
 #[macro_use]
 mod console;
+mod config;
 mod lang_items;
-mod logging;
+mod loader;
 mod sbi;
 mod sync;
 pub mod syscall;
-pub mod trap;
-mod config;
-mod loader;
 pub mod task;
+mod timer;
+pub mod trap;
 
 global_asm!(include_str!("entry.asm"));
 global_asm!(include_str!("link_app.S"));
@@ -49,6 +59,9 @@ pub fn rust_main() -> ! {
     clear_bss();
     println!("[kernel] Hello, world!");
     trap::init();
-    // batch::init();
-    // batch::run_next_app();
+    loader::load_apps();
+    trap::enable_timer_interrupt();
+    timer::set_next_trigger();
+    task::run_first_task();
+    panic!("Unreachable in rust_main!");
 }

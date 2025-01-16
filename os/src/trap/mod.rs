@@ -1,26 +1,32 @@
-//! Trap 处理
+//! Trap handling functionality
 //!
-//! 对于 rCore，我们有一个陷阱切入点，即 __alltraps 在 ['init（）'] 中初始化，我们设置'stvec'CSR 指向它。
-//! 所有的陷阱都经过__alltraps，这是在 trap. S 中定义的汇编语言代码做了足够的工作来恢复内核空间上下文，
-//! 确保 Rust 代码安全运行，并将控制权转移到['trap_handler()'].
-//! 然后它根据异常的确切内容调用不同的功能。例如，定时器中断触发任务抢占，系统调用转到 ['syscall()']。
+//! For rCore, we have a single trap entry point, namely `__alltraps`. At
+//! initialization in [`init()`], we set the `stvec` CSR to point to it.
+//!
+//! All traps go through `__alltraps`, which is defined in `trap.S`. The
+//! assembly language code does just enough work restore the kernel space
+//! context, ensuring that Rust code safely runs, and transfers control to
+//! [`trap_handler()`].
+//!
+//! It then calls different functionality based on what exactly the exception
+//! was. For example, timer interrupts trigger task preemption, and syscalls go
+//! to [`syscall()`].
 
 mod context;
 
-
-use crate::loader::run_next_app;
 use crate::syscall::syscall;
+use crate::task::{exit_current_and_run_next, suspend_current_and_run_next};
+use crate::timer::set_next_trigger;
 use core::arch::global_asm;
 use riscv::register::{
     mtvec::TrapMode,
-    scause::{self, Exception, Trap},
-    stval, stvec,
+    scause::{self, Exception, Interrupt, Trap},
+    sie, stval, stvec,
 };
 
 global_asm!(include_str!("trap.S"));
 
 /// initialize CSR `stvec` as the entry of `__alltraps`
-/// 初始化CSR的中断处理标识位,发生中断时可以跳到该入口进行处理
 pub fn init() {
     extern "C" {
         fn __alltraps();
@@ -30,9 +36,15 @@ pub fn init() {
     }
 }
 
+/// timer interrupt enabled
+pub fn enable_timer_interrupt() {
+    unsafe {
+        sie::set_stimer();
+    }
+}
+
 #[no_mangle]
 /// handle an interrupt, exception, or system call from user space
-/// 处理来自用户空间的中断、异常或系统调用
 pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
     let scause = scause::read(); // get trap cause
     let stval = stval::read(); // get extra value
@@ -42,12 +54,16 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
             cx.x[10] = syscall(cx.x[17], [cx.x[10], cx.x[11], cx.x[12]]) as usize;
         }
         Trap::Exception(Exception::StoreFault) | Trap::Exception(Exception::StorePageFault) => {
-            println!("[kernel] PageFault in application, kernel killed it.");
-            run_next_app();
+            println!("[kernel] PageFault in application, bad addr = {:#x}, bad instruction = {:#x}, kernel killed it.", stval, cx.sepc);
+            exit_current_and_run_next();
         }
         Trap::Exception(Exception::IllegalInstruction) => {
             println!("[kernel] IllegalInstruction in application, kernel killed it.");
-            run_next_app();
+            exit_current_and_run_next();
+        }
+        Trap::Interrupt(Interrupt::SupervisorTimer) => {
+            set_next_trigger();
+            suspend_current_and_run_next();
         }
         _ => {
             panic!(
